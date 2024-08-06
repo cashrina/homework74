@@ -1,5 +1,5 @@
 import express from 'express';
-import fs from 'fs';
+import {promises as fs} from 'fs';
 import {IMessages, MessageWithDate} from "./types";
 
 const app = express();
@@ -9,9 +9,8 @@ app.use(express.json());
 
 const SAVE_DIR = 'messages';
 
-app.post('/messages', (req, res) => {
+app.post('/messages',async (req, res) => {
     const data : IMessages   =  req.body;
-    console.log(data);
     const dataDate: MessageWithDate = {
         ...data,
         date: new Date().toISOString(),
@@ -19,12 +18,8 @@ app.post('/messages', (req, res) => {
 
     const filename = `${SAVE_DIR}/${dataDate.date}.txt`;
 
-    fs.writeFile(filename, `${data.message}`, (err) => {
-        if (err) {
-            console.error(err);
-        }
-        res.json(data);
-    });
+    await fs.writeFile(filename, data.message);
+    res.json(dataDate);
 
 });
 
